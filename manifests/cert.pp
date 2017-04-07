@@ -115,7 +115,7 @@ define sslmgmt::cert (
   validate_bool($onefile)
 
   # get our certificate hash
-  $certificates = hiera('sslmgmt::certs')
+  $certificates = hiera_hash('sslmgmt::certs')
   validate_hash($certificates)
 
   # make sure we actually have a cert
@@ -127,7 +127,7 @@ define sslmgmt::cert (
   if ($chain) {
     validate_string($chain)
 
-    $ca = hiera('sslmgmt::ca')
+    $ca = hiera_hash('sslmgmt::ca')
     validate_hash($ca)
 
     if (! has_key($ca, $chain)) {

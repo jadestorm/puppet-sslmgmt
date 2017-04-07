@@ -94,7 +94,7 @@ define sslmgmt::ca_dh (
   }
 
   # get our CA hash
-  $ca = hiera('sslmgmt::ca')
+  $ca = hiera_hash('sslmgmt::ca')
   validate_hash($ca)
 
   if (! has_key($ca, $title)) {
