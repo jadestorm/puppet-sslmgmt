@@ -18,28 +18,36 @@ class sslmgmt::params {
     case $::osfamily {
         'RedHat': {
             $pkistore = {
-              'default'      => {
-                  'certpath' => '/etc/pki/tls/certs',
-                  'keypath'  => '/etc/pki/tls/private',
-                  'certmode' => '0644',
-                  'owner'    => 'root',
-                  'group'    => 'root',
+               'default'      => {
+                   'certpath' => '/etc/pki/tls/certs',
+                   'keypath'  => '/etc/pki/tls/private',
+                   'certmode' => '0644',
+                   'owner'    => 'root',
+                   'group'    => 'root',
                 },
             }
         }
         'Debian': {
             $pkistore = {
-              'default'      => {
-                  'certpath' => '/etc/ssl/certs',
-                  'keypath'  => '/etc/ssl/private',
-                  'certmode' => '0644',
-                  'owner'    => 'root',
-                  'group'    => 'root',
-                },
+                'default'      => {
+                    'certpath' => '/etc/ssl/certs',
+                    'keypath'  => '/etc/ssl/private',
+                    'certmode' => '0644',
+                    'owner'    => 'root',
+                    'group'    => 'root',
+                 },
             }
         }
         default: {
-          notify { 'This platform is not supported by sslmgmt.': }
+            $pkistore = {
+                 'default'      => {
+                     'certpath' => '/etc/ssl/certs',
+                     'keypath'  => '/etc/ssl/private',
+                     'certmode' => '0644',
+                     'owner'    => 'root',
+                     'group'    => 'root',
+                 },
+            }
         }
     }
 }
