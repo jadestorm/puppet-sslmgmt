@@ -134,10 +134,20 @@ define sslmgmt::cert (
   # get our certificate hash
   if $certdata and (!$installkey or $keydata) {
     # fake a hash pulled from hiera to make this easier and cleaner later in code
-    $certificates[$title] = {}
-    $certificates[$title]['cert'] = $certdata
     if ($installkey) {
-      $certificates[$title]['key'] = $keydata
+      $certificates = {
+        $title => {
+          'cert' => $certdata,
+          'key'  => $keydata,
+        }
+      }
+    }
+    else {
+      $certificates = {
+        $title => {
+          'cert' => $certdata,
+        }
+      }
     }
   }
   else {
