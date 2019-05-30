@@ -49,6 +49,10 @@
 #   override the keyfilename that is used for the destination key. This
 #   is only available when using a custom pkistore
 #
+# [*certdata*]
+#   Optional direct specification of certificate data.  If left out, hiera
+#   lookup will be performed.
+#
 # === Examples
 #
 # === Authors
@@ -67,6 +71,7 @@ define sslmgmt::ca_dh (
   $pkistore,
   $ensure       = 'present',
   $customstore  = undef,
+  $certdata     = undef,
 ) {
   # load the params class so we can get our pkistore types
   include ::sslmgmt::params
@@ -93,15 +98,20 @@ define sslmgmt::ca_dh (
     }
   }
 
-  # get our CA hash
-  $ca = hiera_hash('sslmgmt::ca')
-  validate_hash($ca)
-
-  if (! has_key($ca, $title)) {
-    fail("please ensure that ${title} exists in hiera sslmgmt::ca")
+  if $certdata {
+    $cert = $certdata
   }
   else {
-    $cert = $ca[$title]
+    # get our CA hash from Hiera
+    $ca = hiera_hash('sslmgmt::ca')
+    validate_hash($ca)
+
+    if (! has_key($ca, $title)) {
+      fail("please ensure that ${title} exists in hiera sslmgmt::ca")
+    }
+    else {
+      $cert = $ca[$title]
+    }
   }
 
   # crack out the default pkistore as we need to use it for a few

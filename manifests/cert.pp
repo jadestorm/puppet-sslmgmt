@@ -63,6 +63,20 @@
 #
 #   Default: false
 #
+# [*certdata*]
+#   Optional direct specification of certificate data.  If left out, hiera
+#   lookup will be performed.  This must be paired with either installkey
+#   set to false, or keydata.
+#
+# [*keydata*]
+#   Optional direct specification of key data.  If left out, hiera
+#   lookup will be performed.  This must be paired with certdata.
+#
+# [*chaindata*]
+#   Optional direct specification of ca data.  If left out, hiera
+#   lookup will be performed.  For this to work you have to also specify
+#   a name for *chain*.
+#
 # === Examples
 #
 # === Authors
@@ -84,6 +98,9 @@ define sslmgmt::cert (
   $customstore  = undef,
   $installkey   = true,
   $onefile      = false,
+  $certdata     = undef,
+  $keydata      = undef,
+  $chaindata    = undef,
 ) {
   # load the params class so we can get our pkistore types
   include ::sslmgmt::params
@@ -115,26 +132,43 @@ define sslmgmt::cert (
   validate_bool($onefile)
 
   # get our certificate hash
-  $certificates = hiera_hash('sslmgmt::certs')
+  if $certdata and (!$installkey or $keydata) {
+    # fake a hash pulled from hiera to make this easier and cleaner later in code
+    $certificates[$title] = {}
+    $certificates[$title]['cert'] = $certdata
+    if ($installkey) {
+      $certificates[$title]['key'] = $keydata
+    }
+  }
+  else {
+    $certificates = hiera_hash('sslmgmt::certs', {})
+  }
   validate_hash($certificates)
 
-  # make sure we actually have a cert
-  if (! has_key($certificates, $title)) {
-    fail("please ensure that ${title} exists in hiera sslmgmt::certs")
+  # make sure we actually have a cert if the data was not specified directly
+  if (!$certdata and !$keydata) {
+    if (! has_key($certificates, $title)) {
+      fail("please ensure that ${title} exists in hiera sslmgmt::certs")
+    }
   }
 
   # make sure that there is a chain store if it's being requested
   if ($chain) {
     validate_string($chain)
 
-    $ca = hiera_hash('sslmgmt::ca')
-    validate_hash($ca)
-
-    if (! has_key($ca, $chain)) {
-      fail("please ensure that ${chain} exists in hiera sslmgmt::ca")
+    if $chaindata {
+      $cacert = $chaindata
     }
     else {
-      $cacert = $ca[$chain]
+      $ca = hiera_hash('sslmgmt::ca')
+      validate_hash($ca)
+
+      if (! has_key($ca, $chain)) {
+        fail("please ensure that ${chain} exists in hiera sslmgmt::ca")
+      }
+      else {
+        $cacert = $ca[$chain]
+      }
     }
   }
 
