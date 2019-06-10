@@ -249,7 +249,7 @@ define sslmgmt::cert (
 
   # create the cert content
   if ($chain) {
-    $_certcontent = inline_template('<%= @cert -%><%= @cacert -%>')
+    $_certcontent = "${cert}${cacert}"
   }
   else {
     $_certcontent = $cert
