@@ -38,6 +38,17 @@ class sslmgmt::params {
         },
       }
     }
+    'Darwin': {
+      $pkistore = {
+        'default'    => {
+          'certpath' => '/etc/ssl/certs',
+          'keypath'  => '/etc/ssl/private',
+          'certmode' => '0644',
+          'owner'  => 'root',
+          'group'  => 'wheel',
+        },
+      }
+    }
     default: {
       $pkistore = {
         'default'    => {
